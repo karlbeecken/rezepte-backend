@@ -6,13 +6,18 @@ const client = require("../db/poolClient");
 
 const getAllRecipes = () => {
   return new Promise((resolve, reject) => {
-    client.query("SELECT * FROM recipe", (err, res) => {
-      if (err) {
+    client
+      .query("SELECT * FROM recipe")
+      .then((res, err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res.rows);
+        }
+      })
+      .catch((err) => {
         reject(err);
-      } else {
-        resolve(res.rows);
-      }
-    });
+      });
   });
 };
 
@@ -30,6 +35,9 @@ const getRecipeById = (uuid) => {
             reject(new Error("Recipe not found"));
           }
         }
+      })
+      .catch((err) => {
+        reject(err);
       });
   });
 };
@@ -44,6 +52,9 @@ const addRecipe = (recipe) => {
         } else {
           resolve(res.rows[0]);
         }
+      })
+      .catch((err) => {
+        reject(err);
       });
   });
 };
@@ -65,6 +76,9 @@ const updateRecipe = async (recipe, uuid) => {
             reject(new Error("Recipe not found"));
           }
         }
+      })
+      .catch((err) => {
+        reject(err);
       });
   });
 };
@@ -82,8 +96,55 @@ const deleteRecipe = async (uuid) => {
         } else {
           reject(new Error("Recipe not found"));
         }
+      })
+      .catch((err) => {
+        reject(err);
       });
   });
 };
 
-export { getAllRecipes, addRecipe, getRecipeById, updateRecipe, deleteRecipe };
+const addIngredientToRecipe = async (ingredient, recipe, amount) => {
+  return new Promise(async (resolve, reject) => {
+    if (!amount) {
+      client
+        .query(
+          "INSERT INTO recipe_ingredient (recipe, ingredient) VALUES ($1, $2) RETURNING *",
+          [recipe, ingredient]
+        )
+        .then((res, err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res.rows[0]);
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    } else {
+      client
+        .query(
+          "INSERT INTO recipe_ingredient (recipe, ingredient, amount) VALUES ($1, $2, $3) RETURNING *",
+          [recipe, ingredient, amount]
+        )
+        .then((res, err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(res.rows[0]);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    }
+  });
+};
+
+export {
+  getAllRecipes,
+  addRecipe,
+  getRecipeById,
+  updateRecipe,
+  deleteRecipe,
+  addIngredientToRecipe,
+};

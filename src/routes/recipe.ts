@@ -17,6 +17,7 @@ router.get("/", (_req: express.Request, res: express.Response) => {
       res.json(recipes);
     },
     (err) => {
+      console.log(err);
       res.status(400).json(err);
     }
   );

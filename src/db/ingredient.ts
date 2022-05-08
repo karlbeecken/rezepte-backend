@@ -29,6 +29,9 @@ const getIngredientById = (uuid) => {
             reject(new Error("Ingredient not found"));
           }
         }
+      })
+      .catch((err) => {
+        reject(err);
       });
   });
 };
@@ -46,6 +49,9 @@ const addIngredient = (ingredient) => {
           } else {
             resolve(res.rows[0]);
           }
+        })
+        .catch((err) => {
+          reject(err);
         });
     } else {
       client
@@ -58,6 +64,9 @@ const addIngredient = (ingredient) => {
             reject(err);
           }
           resolve(res.rows[0]);
+        })
+        .catch((err) => {
+          reject(err);
         });
     }
   });
@@ -81,6 +90,9 @@ const updateIngredient = async (ingredient, uuid) => {
               reject(new Error("Ingredient not found"));
             }
           }
+        })
+        .catch((err) => {
+          reject(err);
         });
     } else {
       client
@@ -98,6 +110,9 @@ const updateIngredient = async (ingredient, uuid) => {
               reject(new Error("Ingredient not found"));
             }
           }
+        })
+        .catch((err) => {
+          reject(err);
         });
     }
   });
@@ -116,6 +131,9 @@ const deleteIngredient = async (uuid) => {
         } else {
           reject(new Error("Ingredient not found"));
         }
+      })
+      .catch((err) => {
+        reject(err);
       });
   });
 };
