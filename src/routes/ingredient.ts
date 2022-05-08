@@ -1,25 +1,24 @@
 import express from "express";
-import { check, body, param, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 
 const router = express.Router();
 
 import {
-  getAllRecipes,
-  addRecipe,
-  getRecipeById,
-  updateRecipe,
-  deleteRecipe,
-} from "../db/recipe";
+  getAllIngredients,
+  getIngredientById,
+  addIngredient,
+  updateIngredient,
+  deleteIngredient,
+} from "../db/ingredient";
 
 router.get("/", (_req: express.Request, res: express.Response) => {
-  getAllRecipes().then(
-    (recipes) => {
-      res.json(recipes);
-    },
-    (err) => {
+  getAllIngredients()
+    .then((ingredients) => {
+      res.json(ingredients);
+    })
+    .catch((err) => {
       res.status(400).json(err);
-    }
-  );
+    });
 });
 
 router.get(
@@ -31,12 +30,12 @@ router.get(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    getRecipeById(req.params.uuid)
-      .then((recipe) => {
-        res.json(recipe);
+    getIngredientById(req.params.uuid)
+      .then((ingredient) => {
+        res.json(ingredient);
       })
       .catch((err) => {
-        if (err.message === "Recipe not found") {
+        if (err.message === "Ingredient not found") {
           res.status(404).json(err);
         } else {
           res.status(400).json(err);
@@ -48,16 +47,16 @@ router.get(
 router.post(
   "/",
   body("name").exists({ checkFalsy: true }).isString(),
+  body("price").optional().isNumeric(),
   (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ errors: errors.array() });
-      return;
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    addRecipe(req.body)
-      .then((recipe) => {
-        res.status(201).json(recipe);
+    addIngredient(req.body)
+      .then((ingredient) => {
+        res.status(201).json(ingredient);
       })
       .catch((err) => {
         res.status(400).json(err);
@@ -68,19 +67,30 @@ router.post(
 router.put(
   "/:uuid",
   param("uuid").isUUID(),
-  body("name").exists({ checkFalsy: true }).isString(),
+  body("name").optional().isString().notEmpty(),
+  body("price").optional().isNumeric(),
   (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    updateRecipe(req.body, req.params.uuid)
-      .then((recipe) => {
-        res.json(recipe);
+    if (req.body.name === undefined && req.body.price === undefined) {
+      return res.status(400).json({
+        errors: [
+          {
+            msg: "You must provide either a name or a price",
+          },
+        ],
+      });
+    }
+
+    updateIngredient(req.body, req.params.uuid)
+      .then((ingredient) => {
+        res.json(ingredient);
       })
       .catch((err) => {
-        if (err.message === "Recipe not found") {
+        if (err.message === "Ingredient not found") {
           res.status(404).json(err);
         } else {
           res.status(400).json(err);
@@ -98,12 +108,12 @@ router.delete(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    deleteRecipe(req.params.uuid)
+    deleteIngredient(req.params.uuid)
       .then((success) => {
         res.json({ success });
       })
       .catch((err) => {
-        if (err.message === "Recipe not found") {
+        if (err.message === "Ingredient not found") {
           res.status(404).json(err);
         } else {
           res.status(400).json(err);

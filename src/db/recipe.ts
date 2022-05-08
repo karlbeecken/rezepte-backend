@@ -51,10 +51,10 @@ const addRecipe = (recipe) => {
 const updateRecipe = async (recipe, uuid) => {
   return new Promise(async (resolve, reject) => {
     client
-      .query("UPDATE recipe SET name = $1 WHERE uuid = $2 RETURNING *", [
-        recipe.name,
-        uuid,
-      ])
+      .query(
+        "UPDATE recipe SET name = $1, last_modified = NOW() WHERE uuid = $2 RETURNING *",
+        [recipe.name, uuid]
+      )
       .then((res, err) => {
         if (err) {
           reject(err);

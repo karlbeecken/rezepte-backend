@@ -103,7 +103,7 @@ describe("Recipe route", function () {
       await postRecipe({}, 400);
     });
 
-    async function postRecipe(req, status = 200) {
+    async function postRecipe(req, status = 201) {
       const { body } = await request(app)
         .post("/recipe")
         .send(req)
@@ -117,14 +117,28 @@ describe("Recipe route", function () {
       const req = {
         name: "cool sample recipe",
       };
-      await putRecipe(uuid, req);
+      const res = await putRecipe(uuid, req);
+
+      expect(res).toEqual({
+        uuid,
+        name: req.name,
+        created: expect.any(String),
+        last_modified: expect.any(String),
+      });
+      expect(res.last_modified).not.toEqual(res.created);
 
       const { rows } = await client.query(
-        "SELECT name FROM recipe WHERE uuid = $1",
+        "SELECT * FROM recipe WHERE uuid = $1",
         [uuid]
       );
-      expect(rows).toHaveLength(1);
-      expect(rows[0]).toEqual(req);
+
+      expect(rows[0]).toEqual({
+        uuid,
+        name: req.name,
+        created: expect.any(Date),
+        last_modified: expect.any(Date),
+      });
+      expect(rows[0].last_modified).not.toEqual(rows[0].created);
     });
 
     it("Should return a 404 if the recipe does not exist", async function () {
