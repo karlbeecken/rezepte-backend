@@ -5,20 +5,37 @@ services:
     container_name: postgres_container
     image: postgres
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "changeme"
-      PGDATA: /data/postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: recipes
+      PGDATA: /postgres
     volumes:
-      - postgres:/data/postgres
+      - postgres:/postgres
+      - ./src/db/recipes.sql:/docker-entrypoint-initdb.d/recipes.sql
     ports:
       - "5432:5432"
     networks:
-      - postgres
+      - app
     restart: unless-stopped
+  backend:
+    container_name: backend_container
+    build: .
+    environment:
+      PORT: 3000
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: changeme
+      PGDATABASE: recipes
+    command: yarn start:prod
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - app
 
 networks:
-  postgres:
-    driver: bridge
+  app:
 
 volumes:
   postgres:

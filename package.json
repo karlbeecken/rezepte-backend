@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon ./src/app.ts",
+    "start:prod": "node dist/app.js",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch"
