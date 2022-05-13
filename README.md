@@ -12,6 +12,8 @@ You need to have docker and docker-compose installed and a docker daemon running
 
 To start the service, simply run `docker-compose up -d`.
 
+Upon first startup, the database will be created according to the schema defined in the file `src/db/recipes.sql`. The database files will then be stored in a docker volume, persistent to restarts.
+
 ### Shutdown
 
 To shut down the service, simply run `docker-compose down`.
