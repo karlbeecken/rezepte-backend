@@ -4,27 +4,42 @@ dotenv.config();
 
 const client = require("../db/poolClient");
 
+/**
+ * Gets all recipes from the database
+ *@returns {Promise<Array>} - Returns an array of recipes
+ */
 const getAllRecipes = () => {
   return new Promise((resolve, reject) => {
+    // new Promise is returned to router
     client
-      .query("SELECT * FROM recipe")
+      .query("SELECT * FROM recipe") // query all recipes from database
       .then((res, err) => {
+        // once query is complete
         if (err) {
-          reject(err);
+          // if there is an error
+          reject(err); // reject the error
         } else {
-          resolve(res.rows);
+          // if there is no error
+          resolve(res.rows); // resolve the promise with an array of recipes
         }
       })
       .catch((err) => {
-        reject(err);
+        // if there is an error
+        reject(err); // reject the error
       });
   });
 };
 
+/**
+ * Gets a specific recipe by its uuid
+ * @param {string} uuid - The uuid of the recipe
+ * @returns {Promise<object>} - Returns the recipe
+ */
+
 const getRecipeById = (uuid) => {
   return new Promise((resolve, reject) => {
     client
-      .query("SELECT * FROM recipe WHERE uuid = $1", [uuid])
+      .query("SELECT * FROM recipe WHERE uuid = $1", [uuid]) // query from database, filter by uuid
       .then((res, err) => {
         if (err) {
           reject(err);
@@ -42,10 +57,17 @@ const getRecipeById = (uuid) => {
   });
 };
 
+/**
+ * Creates a new recipe in the database
+ * @param {object} recipe - The recipe to be added
+ * @param {string} recipe.name - The name of the recipe
+ * @returns {object} - Returns the newly created recipe
+ */
+
 const addRecipe = (recipe) => {
   return new Promise(async (resolve, reject) => {
     client
-      .query("INSERT INTO recipe (name) VALUES ($1) RETURNING *", [recipe.name])
+      .query("INSERT INTO recipe (name) VALUES ($1) RETURNING *", [recipe.name]) // query to insert recipe into database
       .then((res, err) => {
         if (err) {
           reject(err);
@@ -59,13 +81,20 @@ const addRecipe = (recipe) => {
   });
 };
 
+/**
+ * Modify a recipe
+ * @param {object} recipe - The modified recipe
+ * @param {string} uuid - The uuid of the recipe
+ * @returns {Promise<object>} - Returns the modified recipe
+ */
+
 const updateRecipe = async (recipe, uuid) => {
   return new Promise(async (resolve, reject) => {
     client
       .query(
         "UPDATE recipe SET name = $1, last_modified = NOW() WHERE uuid = $2 RETURNING *",
         [recipe.name, uuid]
-      )
+      ) // query to update recipe in database, set last modified to now and select by uuid
       .then((res, err) => {
         if (err) {
           reject(err);
@@ -86,7 +115,7 @@ const updateRecipe = async (recipe, uuid) => {
 const deleteRecipe = async (uuid) => {
   return new Promise(async (resolve, reject) => {
     client
-      .query("DELETE FROM recipe WHERE uuid = $1 RETURNING *", [uuid])
+      .query("DELETE FROM recipe WHERE uuid = $1 RETURNING *", [uuid]) // query to delete recipe from database, filter by uuid
       .then((res, err) => {
         if (err) {
           reject(err);
@@ -103,6 +132,7 @@ const deleteRecipe = async (uuid) => {
   });
 };
 
+// functionality not yet fully implemented, please disregard
 const addIngredientToRecipe = async (ingredient, recipe, amount) => {
   return new Promise(async (resolve, reject) => {
     if (!amount) {

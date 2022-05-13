@@ -12,13 +12,17 @@ import {
 } from "../db/recipe";
 
 router.get("/", (_req: express.Request, res: express.Response) => {
+  // register /recipes route
   getAllRecipes().then(
+    // execute function from db/recipe.ts
     (recipes) => {
-      res.json(recipes);
+      // if successful
+      res.json(recipes); // return recipes
     },
     (err) => {
-      console.log(err);
-      res.status(400).json(err);
+      // if error
+      console.log(err); // log error
+      res.status(400).json(err); // send error to api consumer
     }
   );
 });
