@@ -22,4 +22,4 @@ To shut down the service, simply run `docker-compose down`.
 
 Every possible case that can occur in routing or db handling is tested with [Jest](https://jestjs.io/).
 
-To run all unit tests, execute `docker exec -it backend_container yarn test`.
+To run all unit tests, execute `docker exec -it backend_container yarn test src`.
