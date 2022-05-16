@@ -1,8 +1,26 @@
 import dotenv from "dotenv";
+import { getIngredientById } from "./ingredient";
 
 dotenv.config();
 
 const client = require("../db/poolClient");
+
+interface Recipe {
+  uuid: string;
+  name: string;
+  created: Date;
+  last_modified: Date;
+  ingredients?: Array<Object>;
+  total_cost?: number;
+}
+
+interface Ingredient {
+  uuid: string;
+  name: string;
+  price?: number;
+  created: Date;
+  last_modified: Date;
+}
 
 /**
  * Gets all recipes from the database
@@ -133,6 +151,13 @@ const deleteRecipe = async (uuid) => {
 };
 
 // functionality not yet fully implemented, please disregard
+/**
+ * Adds an ingredient to a recipe
+ * @param ingredient UUID of the ingredient
+ * @param recipe UUID of the recipe
+ * @param amount Amount of the ingredient
+ * @returns {Promise<object>} Returns the modified recipe
+ */
 const addIngredientToRecipe = async (ingredient, recipe, amount) => {
   return new Promise(async (resolve, reject) => {
     if (!amount) {
@@ -170,6 +195,51 @@ const addIngredientToRecipe = async (ingredient, recipe, amount) => {
   });
 };
 
+const getRecipeIngredients = async (uuid) => {
+  return new Promise(async (resolve, reject) => {
+    getRecipeById(uuid).then(
+      (recipe: Recipe) => {
+        recipe.ingredients = [];
+        client
+          .query("SELECT * FROM recipe_ingredient WHERE recipe = $1", [uuid])
+          .then((res, err) => {
+            if (err) {
+              reject(err);
+            } else if (res.rows.length === 0) {
+              resolve(recipe);
+            } else {
+              res.rows.forEach((el, i) => {
+                getIngredientById(el.ingredient).then(
+                  (ingredient) => {
+                    console.log(ingredient);
+                    recipe.ingredients.push(ingredient);
+                    if (i === res.rows.length - 1) {
+                      let total_cost = 0;
+                      recipe.ingredients.forEach((el: Ingredient) => {
+                        if (el.price) total_cost += el.price;
+                      });
+                      recipe.total_cost = total_cost;
+                      resolve(recipe);
+                    }
+                  },
+                  (err) => {
+                    reject(err);
+                  }
+                );
+              });
+            }
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      },
+      (err) => {
+        reject(err);
+      }
+    );
+  });
+};
+
 export {
   getAllRecipes,
   addRecipe,
@@ -177,4 +247,5 @@ export {
   updateRecipe,
   deleteRecipe,
   addIngredientToRecipe,
+  getRecipeIngredients,
 };

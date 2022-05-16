@@ -9,6 +9,8 @@ import {
   getRecipeById,
   updateRecipe,
   deleteRecipe,
+  addIngredientToRecipe,
+  getRecipeIngredients,
 } from "../db/recipe";
 
 router.get("/", (_req: express.Request, res: express.Response) => {
@@ -36,17 +38,30 @@ router.get(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    getRecipeById(req.params.uuid)
-      .then((recipe) => {
-        res.json(recipe);
-      })
-      .catch((err) => {
-        if (err.message === "Recipe not found") {
-          res.status(404).json(err);
-        } else {
+    console.log(req.query);
+    if (req.query.withIngredients === "true") {
+      getRecipeIngredients(req.params.uuid).then(
+        (recipe) => {
+          res.json(recipe);
+        },
+        (err) => {
+          console.log(err);
           res.status(400).json(err);
         }
-      });
+      );
+    } else {
+      getRecipeById(req.params.uuid)
+        .then((recipe) => {
+          res.json(recipe);
+        })
+        .catch((err) => {
+          if (err.message === "Recipe not found") {
+            res.status(404).json(err);
+          } else {
+            res.status(400).json(err);
+          }
+        });
+    }
   }
 );
 
